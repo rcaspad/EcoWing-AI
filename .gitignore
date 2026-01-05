@@ -54,22 +54,13 @@ logs/
 credentials.json
 secrets.json
 
-# Model artifacts (ignorados para evitar subir pesos grandes)
-*.h5
-*.hdf5
-*.tflite
-*.ckpt
-*.pb
-*.onnx
-*.pth
-*.pt
-models/checkpoints/
-models/tflite/
+# IMPORTANTE: Permitir models/ con .tflite y .keras (<100MB)
+# Solo ignorar checkpoints temporales dentro de models/
+models/checkpoints/*.tmp
+models/checkpoints/*.temp
 
-# Datos sensibles o pesados
-data/raw/
-data/processed/
-data/video_demo/
+# Datos crudos (SIEMPRE ignorar - no subir datasets)
+data/
 
 # Otros archivos binarios o empaquetados grandes
 *.zip
