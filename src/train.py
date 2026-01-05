@@ -1,12 +1,13 @@
 """Script de entrenamiento maestro (versión rápida de prueba).
 
-Carga datasets desde `src.data_loader`, construye el modelo dual
-con `build_econet_dual`, compila con Adam(1e-4) y entrena 5 épocas.
+Carga datasets, construye el modelo dual EcoNet con arquitectura híbrida,
+compila con Adam(1e-4) y entrena con configuración flexible de epochs.
 Guarda el mejor modelo en `models/best_model.keras` y el historial
 en `models/history.npy`.
 """
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 import logging
 import os
@@ -15,13 +16,13 @@ import numpy as np
 import tensorflow as tf
 from sklearn.utils.class_weight import compute_class_weight
 
+# Añadir el directorio raíz al path para imports
+ROOT = Path(__file__).parent.parent
+sys.path.insert(0, str(ROOT))
+
 from src.data_loader import load_dataset
 from src.model_factory import build_econet_dual
-
-try:
-    from src.config import DATA_DIR, MODELS_DIR, BATCH_SIZE
-except Exception:
-    from .config import DATA_DIR, MODELS_DIR, BATCH_SIZE
+from src.config import DATA_DIR, MODELS_DIR, BATCH_SIZE
 
 
 logging.basicConfig(level=logging.INFO)

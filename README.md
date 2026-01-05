@@ -14,12 +14,14 @@ El modelo integra técnicas de **Explainable AI (XAI)** mediante mapas de atenci
 
 | Métrica | Valor | Contexto |
 |:--------|:------|:---------|
-| **Accuracy (Test)** | 76.3% | Proof of Concept - 2 epochs |
+| **Accuracy (Test)** | 82.3% | Entrenamiento 7 epochs (EarlyStopping) |
 | **Tamaño Original** | 32.95 MB | Modelo Keras (.keras) |
 | **Tamaño Optimizado** | 7.35 MB | TFLite INT8 cuantizado |
-| **Reducción de Peso** | **77%** | Óptimo para edge deployment |
+| **Reducción de Peso** | **77%** | De 33MB → 7.3MB para edge deployment |
 | **Latencia de Inferencia** | ~180ms | Simulado en CPU (sin GPU) |
 | **Parámetros Totales** | 6.96M | 657k entrenables |
+
+> **Nota sobre PoC:** Este es un **prototipo rápido** entrenado en 7 épocas con tf_flowers como dataset placeholder. Con dataset real de plagas (PlantVillage) y más epochs, se espera alcanzar >90% accuracy en producción.
 
 ---
 
@@ -93,6 +95,34 @@ Estas augmentations aumentan la robustez del modelo ante variabilidad ambiental,
 4. Superposición semitransparente (α=0.5) sobre imagen original
 
 **Interpretación:** Las regiones en rojo/amarillo indican zonas de alta activación neuronal. El modelo aprende correctamente a enfocarse en la estructura de la flor/hoja, ignorando el fondo, validando que no sobre-ajusta a artefactos del dataset.
+
+---
+
+## 📊 Resultados Experimentales
+
+### 3. **Curvas de Entrenamiento (Loss & Accuracy)**
+![Training Curves](docs/training_curves.png)
+
+**Análisis de convergencia:** Las gráficas muestran la evolución del modelo durante 7 épocas con EarlyStopping activo:
+- **Loss:** Descenso consistente tanto en entrenamiento como validación, sin signos de overfitting
+- **Accuracy:** Mejora progresiva alcanzando **86.24% en validación** (Epoch 4)
+- **Generalización:** Gap reducido entre train/val indica buen balance bias-variance
+- **EarlyStopping:** Se detuvo automáticamente tras 3 epochs sin mejora, evitando entrenamiento innecesario
+
+El modelo demuestra convergencia estable y capacidad de generalización adecuada para un PoC.
+
+---
+
+### 4. **Matriz de Confusión (Test Set)**
+![Confusion Matrix](docs/confusion_matrix.png)
+
+**Interpretación por clase:** La matriz revela el desempeño del modelo en cada una de las 5 clases del dataset:
+- **Diagonal principal:** Predicciones correctas (tonos azul oscuro = alta precisión)
+- **Elementos fuera de diagonal:** Confusiones entre clases similares
+- **Test Accuracy: 82.3%** - Rendimiento sólido para arquitectura híbrida en 7 épocas
+- **Aplicación práctica:** Permite identificar qué plagas/enfermedades necesitan más datos de entrenamiento
+
+Esta matriz es esencial para validación agronómica y ajuste de umbrales de confianza en producción.
 
 ---
 
