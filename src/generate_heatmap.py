@@ -8,6 +8,7 @@ import cv2
 
 
 def find_class_image(root: Path, class_name: str = "daisy") -> Path | None:
+    target = root / class_name
     if target.exists() and target.is_dir():
         for ext in ("*.jpg", "*.jpeg", "*.png"):
             for p in target.rglob(ext):
