@@ -7,9 +7,14 @@ from __future__ import annotations
 
 from pathlib import Path
 import random
+import sys
 import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
+
+# Add parent directory to path for imports
+ROOT = Path(__file__).parent.parent
+sys.path.insert(0, str(ROOT))
 
 from src.data_loader import load_dataset, get_augmentation_layer
 
@@ -32,11 +37,10 @@ def motion_blur(image: tf.Tensor, kernel_size: int = 9, direction: str = "horizo
 
 
 def main() -> None:
-    base = Path(__file__).resolve().parents[1]
-    docs_dir = base / "docs"
+    docs_dir = ROOT / "docs"
     docs_dir.mkdir(parents=True, exist_ok=True)
 
-    data_dir = base / "data" / "raw"
+    data_dir = ROOT / "data" / "raw"
     if not data_dir.exists():
         print("data/raw/ no existe. Ejecuta src/download_data.py primero.")
         return

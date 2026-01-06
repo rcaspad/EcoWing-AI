@@ -56,8 +56,13 @@ def main() -> int:
     
     # 4. Generar predicciones y convertir a etiquetas de clase
     print("🧠 Generando predicciones sobre el conjunto de prueba...")
-    preds = model.predict(test_ds, verbose=1)
-    y_pred = np.argmax(preds, axis=1)  # Convertir probabilidades a clases
+    y_pred_probs = []
+    for images, _ in test_ds:
+        preds = model.predict(images, verbose=0)
+        y_pred_probs.extend(preds)
+    
+    y_pred_probs = np.array(y_pred_probs)
+    y_pred = np.argmax(y_pred_probs, axis=1)  # Convertir probabilidades a clases
     
     print(f"✅ Predicciones completadas: {len(y_pred)} muestras")
     
