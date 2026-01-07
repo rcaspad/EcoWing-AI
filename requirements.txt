@@ -1,8 +1,28 @@
+# ============================================
+# EcoWing AI - Requirements
+# ============================================
+# Core dependencies for plant disease detection
+# with Edge AI optimized models
+# ============================================
+
+# Deep Learning Framework
 tensorflow==2.20.0
-tensorflow-datasets==4.9.9
+
+# Numerical Computing
 numpy==2.2.6
-opencv-python-headless==4.12.0.88
+
+# Computer Vision
+opencv-python==4.12.0.88
+
+# Data Visualization
 matplotlib==3.10.8
 seaborn==0.13.2
+
+# Machine Learning Utilities
 scikit-learn==1.8.0
-pandas==2.3.3
+
+# Optional: Data Analysis
+# pandas==2.3.3
+
+# Optional: Dataset Management
+# tensorflow-datasets==4.9.9

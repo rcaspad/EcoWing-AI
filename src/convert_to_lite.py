@@ -13,8 +13,8 @@ def bytes_to_mb(n: int) -> float:
 def main() -> int:
     project_root = Path(__file__).resolve().parents[1]
     models_dir = project_root / "models"
-    keras_path = models_dir / "best_model.keras"
-    tflite_path = models_dir / "ecowing_quantized.tflite"
+    keras_path = models_dir / "best_model_v2.keras"
+    tflite_path = models_dir / "ecowing_v2_quantized.tflite"
 
     if not keras_path.exists():
         print(f"Error: modelo Keras no encontrado en: {keras_path}")

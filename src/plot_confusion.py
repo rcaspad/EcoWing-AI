@@ -1,8 +1,10 @@
-"""Script para generar matriz de confusión del modelo EcoNetDual.
+"""Genera la matriz de confusión con orden de etiquetas consistente.
 
-Evalúa el modelo entrenado sobre el conjunto de test y visualiza
-la matriz de confusión con heatmap usando seaborn. Útil para
-identificar clases con mayor confusión y ajustar el modelo.
+Lógica estricta para evitar 'Label Mismatch':
+- Usa ImageDataGenerator con shuffle=False.
+- y_true = generator.classes (orden consistente con filenames).
+- class_indices = generator.class_indices; invertir para obtener labels por índice.
+- Predicciones del modelo sobre el generator (mismo orden).
 """
 from __future__ import annotations
 
@@ -14,94 +16,86 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import confusion_matrix
 
-# Añadir el directorio raíz al path para imports
-ROOT = Path(__file__).parent.parent
-sys.path.insert(0, str(ROOT))
-
-from src.data_loader import load_dataset
-from src.config import DATA_DIR, MODELS_DIR
-
 
 def main() -> int:
-    """Genera matriz de confusión sobre el conjunto de test."""
-    
     project_root = Path(__file__).resolve().parents[1]
+    models_dir = project_root / "models"
+    val_dir = project_root / "data" / "val"
     docs_dir = project_root / "docs"
     docs_dir.mkdir(parents=True, exist_ok=True)
 
-    # 1. Cargar modelo entrenado
-    model_path = Path(MODELS_DIR) / "best_model.keras"
+    model_path = models_dir / "best_model_v2.keras"
     if not model_path.exists():
-        print(f"❌ Error: modelo no encontrado en {model_path}")
+        print(f"Error: modelo no encontrado en {model_path}")
         return 2
 
-    print(f"📦 Cargando modelo desde: {model_path}")
+    print(f"Cargando modelo desde: {model_path}")
     model = tf.keras.models.load_model(str(model_path))
 
-    # 2. Cargar conjunto de prueba
-    print(f"📂 Cargando conjunto de prueba desde: {DATA_DIR}")
-    _, _, test_ds = load_dataset(DATA_DIR)
-
-    # 3. Extraer etiquetas reales (y_true) del dataset
-    print("🔍 Extrayendo etiquetas reales del test set...")
-    y_true_parts = []
-    for _, y in test_ds:
-        y_true_parts.append(y.numpy())
-    
-    if len(y_true_parts) == 0:
-        print("❌ No se encontraron etiquetas en el dataset de prueba.")
+    if not val_dir.exists():
+        print(f"Error: data/val no existe en {val_dir}")
         return 3
-    
-    y_true = np.concatenate(y_true_parts, axis=0)
-    
-    # 4. Generar predicciones y convertir a etiquetas de clase
-    print("🧠 Generando predicciones sobre el conjunto de prueba...")
-    y_pred_probs = []
-    for images, _ in test_ds:
-        preds = model.predict(images, verbose=0)
-        y_pred_probs.extend(preds)
-    
-    y_pred_probs = np.array(y_pred_probs)
-    y_pred = np.argmax(y_pred_probs, axis=1)  # Convertir probabilidades a clases
-    
-    print(f"✅ Predicciones completadas: {len(y_pred)} muestras")
-    
-    # 5. Calcular matriz de confusión
-    print("📊 Calculando matriz de confusión...")
-    cm = confusion_matrix(y_true, y_pred)
-    
-    # Calcular accuracy
-    accuracy = np.trace(cm) / np.sum(cm)
-    print(f"🎯 Accuracy en test set: {accuracy:.2%}")
 
-    # 6. Visualizar con seaborn heatmap
-    plt.figure(figsize=(10, 8))
-    sns.set(font_scale=1.2)
+    # Generador de imágenes del conjunto de validación (orden determinista)
+    datagen = tf.keras.preprocessing.image.ImageDataGenerator(rescale=1.0 / 255.0)
+    test_generator = datagen.flow_from_directory(
+        str(val_dir),
+        target_size=(224, 224),
+        color_mode="rgb",
+        batch_size=32,
+        class_mode="categorical",
+        shuffle=False,
+    )
+
+    # Etiquetas verdaderas con el mismo orden que las imágenes
+    y_true = test_generator.classes
+
+    # Mapeo correcto de clases (nombre -> índice), invertido a (índice -> nombre)
+    class_indices = test_generator.class_indices
+    labels = [None] * len(class_indices)
+    for name, idx in class_indices.items():
+        labels[idx] = name
+
+    # Predicciones en el mismo orden del generator
+    print("Generando predicciones (orden estable)...")
+    y_pred_probs = model.predict(test_generator, verbose=1)
+    y_pred = np.argmax(y_pred_probs, axis=1)
+
+    # Matriz de confusión y accuracy
+    cm = confusion_matrix(y_true, y_pred)
+    accuracy = np.trace(cm) / np.sum(cm)
+    print(f"Accuracy (validación): {accuracy:.2%}")
+
+    # Visualización
+    plt.figure(figsize=(12, 10))
+    sns.set(font_scale=1.0)
     ax = sns.heatmap(
-        cm, 
-        annot=True,        # Mostrar números en cada celda
-        fmt="d",           # Formato entero
-        cmap="Blues",      # Paleta azul
+        cm,
+        annot=True,
+        fmt="d",
+        cmap="Blues",
         cbar=True,
         square=True,
         linewidths=0.5,
-        linecolor='gray'
+        linecolor="gray",
     )
-    
-    ax.set_xlabel("Predicted Class", fontsize=12, fontweight='bold')
-    ax.set_ylabel("True Class", fontsize=12, fontweight='bold')
-    ax.set_title(f"Confusion Matrix - Test Accuracy: {accuracy:.2%}", 
-                 fontsize=14, fontweight='bold', pad=20)
+    ax.set_xticklabels(labels, rotation=45, ha="right")
+    ax.set_yticklabels(labels, rotation=0)
+    ax.set_xlabel("Predicted Class", fontsize=12, fontweight="bold")
+    ax.set_ylabel("True Class", fontsize=12, fontweight="bold")
+    ax.set_title(
+        f"Confusion Matrix (Fixed Labels) - Val Acc: {accuracy:.2%}",
+        fontsize=14,
+        fontweight="bold",
+        pad=20,
+    )
 
-    # 7. Guardar imagen
-    out_path = docs_dir / "confusion_matrix.png"
+    out_path = docs_dir / "confusion_matrix_v3_fixed.png"
     plt.tight_layout()
-    plt.savefig(out_path, dpi=300, bbox_inches='tight')
-    print(f"✅ Matriz de confusión guardada en: {out_path}")
-    
+    plt.savefig(out_path, dpi=300, bbox_inches="tight")
+    print(f"Matriz de confusión guardada en: {out_path}")
     return 0
 
 
 if __name__ == "__main__":
-    rc = main()
-    sys.exit(rc)
+    sys.exit(main())

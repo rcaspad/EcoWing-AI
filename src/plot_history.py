@@ -13,8 +13,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 ROOT = Path(__file__).parent.parent
-HISTORY_PATH = ROOT / "models" / "history.npy"
-OUTPUT_PATH = ROOT / "docs" / "training_curves.png"
+HISTORY_PATH = ROOT / "models" / "history_v2.npy"
+OUTPUT_PATH = ROOT / "docs" / "training_curves_v2.png"
 
 
 def load_history():
@@ -51,6 +51,7 @@ def plot_training_curves(history):
     
     sns.set_style('whitegrid')
     fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+    fig.suptitle('Training Performance (EcoNet-Dual V2)', fontsize=16, fontweight='bold', y=1.05)
     
     epochs = range(1, len(history['loss']) + 1)
     

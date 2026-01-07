@@ -1,9 +1,11 @@
 """Cargador de datos para EcoWing-AI.
 
-Provee `load_dataset(data_dir)` que usa `tf.keras.utils.image_dataset_from_directory`
-para cargar imágenes desde `data/raw/`, aplica un pipeline de aumento con capas
-de Keras (`RandomFlip`, `RandomRotation`, `RandomContrast`) y devuelve tres
-`tf.data.Dataset`: `train_ds`, `val_ds`, `test_ds` con la división 70/20/10.
+Provee `load_dataset()` que carga imágenes desde `data/train` y `data/val`,
+aplica un pipeline de aumento con capas de Keras (`RandomFlip`, `RandomRotation`, 
+`RandomContrast`) y devuelve `train_ds`, `val_ds`, `test_ds` y `num_classes`.
+
+También genera un archivo `models/labels.txt` con los nombres de clases en orden
+alfabético para usar en inferencia.
 """
 from __future__ import annotations
 
@@ -52,28 +54,81 @@ def get_augmentation_layer() -> tf.keras.Sequential:
     )
 
 
-def load_dataset(data_dir: str | Path) -> Tuple[tf.data.Dataset, tf.data.Dataset, tf.data.Dataset]:
-    """Carga imágenes desde `data_dir` (espera subcarpetas por clase) y devuelve
-    `train_ds`, `val_ds`, `test_ds` con particiones 70/20/10.
-
-    El pipeline usa `image_dataset_from_directory` con `batch_size=1` para
-    poder dividir por número de ejemplos y luego reagrupar por `BATCH_SIZE`.
+def get_class_names(data_dir: str | Path) -> list[str]:
+    """Obtiene los nombres de las clases en orden alfabético.
+    
+    Args:
+        data_dir: Directorio con subcarpetas de clases
+        
+    Returns:
+        Lista de nombres de clases ordenados alfabéticamente
     """
     data_dir = Path(data_dir)
-    if not data_dir.exists():
-        raise FileNotFoundError(f"data_dir no existe: {data_dir}")
+    class_dirs = sorted([d.name for d in data_dir.iterdir() if d.is_dir()])
+    return class_dirs
 
-    total = _count_images(data_dir)
-    if total == 0:
-        raise ValueError(f"No se encontraron imágenes en {data_dir}")
 
-    train_n = int(total * 0.7)
-    val_n = int(total * 0.2)
-    test_n = total - train_n - val_n
+def save_labels(class_names: list[str], output_dir: str = 'models') -> Path:
+    """Guarda los nombres de clases en models/labels.txt.
+    
+    Args:
+        class_names: Lista de nombres de clases
+        output_dir: Directorio donde guardar labels.txt
+        
+    Returns:
+        Path al archivo labels.txt creado
+    """
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    
+    labels_path = output_dir / 'labels.txt'
+    
+    with open(labels_path, 'w') as f:
+        for class_name in class_names:
+            f.write(f"{class_name}\n")
+    
+    print(f"Labels guardados en: {labels_path}")
+    return labels_path
 
-    # Load all examples with batch_size=1 to split deterministically
-    ds = tf.keras.utils.image_dataset_from_directory(
-        str(data_dir),
+
+def load_dataset(
+    train_dir: str | Path = 'data/train',
+    val_dir: str | Path = 'data/val'
+) -> Tuple[tf.data.Dataset, tf.data.Dataset, int]:
+    """Carga imágenes desde data/train y data/val.
+    
+    Args:
+        train_dir: Directorio de entrenamiento (default: 'data/train')
+        val_dir: Directorio de validación (default: 'data/val')
+        
+    Returns:
+        Tupla (train_ds, val_ds, num_classes)
+    """
+    train_dir = Path(train_dir)
+    val_dir = Path(val_dir)
+    
+    # Validar directorios
+    if not train_dir.exists():
+        raise FileNotFoundError(f"data/train no existe: {train_dir}")
+    if not val_dir.exists():
+        raise FileNotFoundError(f"data/val no existe: {val_dir}")
+    
+    # Obtener nombres de clases desde data/train
+    class_names = get_class_names(train_dir)
+    num_classes = len(class_names)
+    
+    if num_classes == 0:
+        raise ValueError(f"No se encontraron clases en {train_dir}")
+    
+    print(f"Clases encontradas ({num_classes}): {', '.join(class_names)}")
+    
+    # Guardar labels para inferencia
+    save_labels(class_names)
+    
+    # Cargar dataset de entrenamiento
+    print(f"Cargando dataset de entrenamiento desde {train_dir}...")
+    train_ds = tf.keras.utils.image_dataset_from_directory(
+        str(train_dir),
         labels="inferred",
         label_mode="int",
         batch_size=1,
@@ -81,31 +136,35 @@ def load_dataset(data_dir: str | Path) -> Tuple[tf.data.Dataset, tf.data.Dataset
         shuffle=True,
         seed=42,
     )
-
-    # Split datasets
-    train_ds = ds.take(train_n)
-    rest = ds.skip(train_n)
-    val_ds = rest.take(val_n)
-    test_ds = rest.skip(val_n)
-
-    # Preprocess (normalize) and remove extra batch dim
+    
+    # Cargar dataset de validación
+    print(f"Cargando dataset de validación desde {val_dir}...")
+    val_ds = tf.keras.utils.image_dataset_from_directory(
+        str(val_dir),
+        labels="inferred",
+        label_mode="int",
+        batch_size=1,
+        image_size=IMG_SIZE,
+        shuffle=True,
+        seed=42,
+    )
+    
+    # Preprocess (normalize) y remover batch dim extra
     train_ds = train_ds.map(_preprocess_image_batch, num_parallel_calls=AUTOTUNE)
     val_ds = val_ds.map(_preprocess_image_batch, num_parallel_calls=AUTOTUNE)
-    test_ds = test_ds.map(_preprocess_image_batch, num_parallel_calls=AUTOTUNE)
-
-    # Augmentation only for training
+    
+    # Augmentation solo para entrenamiento
     augmentation = get_augmentation_layer()
     def _augment(x, y):
         return augmentation(x), y
-
+    
     train_ds = train_ds.map(_augment, num_parallel_calls=AUTOTUNE)
-
-    # Batch and prefetch
+    
+    # Batch y prefetch
     train_ds = _final_batch(train_ds, BATCH_SIZE, training=True)
     val_ds = _final_batch(val_ds, BATCH_SIZE, training=False)
-    test_ds = _final_batch(test_ds, BATCH_SIZE, training=False)
+    
+    return train_ds, val_ds, num_classes
 
-    return train_ds, val_ds, test_ds
 
-
-__all__ = ["load_dataset", "get_augmentation_layer"]
+__all__ = ["load_dataset", "get_augmentation_layer", "get_class_names", "save_labels"]
