@@ -63,7 +63,7 @@ EcoWing-AI/
 ├── docs/                         # Documentación y evidencias visuales
 │   ├── augmentation_evidence.png
 │   ├── training_curves.png
-│   ├── confusion_matrix.png
+│   ├── confusion_matrix_v3_fixed.png
 │   └── visual_evidence_REAL.jpg  # Mapa de saliencia generado
 │
 ├── requirements.txt              # Dependencias del proyecto
@@ -155,7 +155,7 @@ python src/plot_history.py
 python src/plot_confusion.py
 ```
 
-**Salida:** `docs/confusion_matrix.png`
+**Salida:** `docs/confusion_matrix_v3_fixed.png`
 
 ---
 
@@ -181,7 +181,7 @@ Pipeline de data augmentation que simula variabilidad real en captura aérea (ro
 Evolución de pérdida y precisión durante el entrenamiento mostrando convergencia estable.
 
 ### 3. Análisis de Errores (Matriz de Confusión)
-![Confusion Matrix](docs/confusion_matrix.png)
+![Confusion Matrix](docs/confusion_matrix_v3_fixed.png)
 
 Desempeño del modelo por clase identificando patrones de clasificación.
 
