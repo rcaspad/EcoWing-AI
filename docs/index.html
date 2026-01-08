@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoWing AI - Vigilancia Autónoma de Cultivos con Edge AI</title>
+    <meta name="description" content="EcoWing AI revoluciona la agricultura con drones autónomos equipados con Edge AI. Detección de plagas en tiempo real sin internet. 79.87% precisión con EcoNet-Dual.">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Custom Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --neon-green: #39ff14;
+            --neon-orange: #ff6b35;
+            --dark-bg: #0a0a0a;
+            --dark-secondary: #1a1a1a;
+            --dark-card: #222222;
+            --text-primary: #ffffff;
+            --text-secondary: #b3b3b3;
+            --text-muted: #666666;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+        
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        /* Logo Styles */
+        .logo-container {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+            border-radius: 12px;
+            padding: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(57, 255, 20, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .logo-container:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 25px rgba(57, 255, 20, 0.4);
+        }
+        
+        .logo-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 0 5px rgba(57, 255, 20, 0.3));
+        }
+        
+        /* Neon Glow Effects */
+        .neon-green {
+            color: var(--neon-green);
+        }
+        
+        .neon-orange {
+            color: var(--neon-orange);
+        }
+        
+        .neon-border-green {
+            border: 1px solid var(--neon-green);
+            box-shadow: 0 0 5px var(--neon-green), inset 0 0 5px rgba(57, 255, 20, 0.1);
+        }
+        
+        .neon-border-orange {
+            border: 1px solid var(--neon-orange);
+            box-shadow: 0 0 5px var(--neon-orange), inset 0 0 5px rgba(255, 107, 53, 0.1);
+        }
+        
+        .neon-button-green {
+            background: transparent;
+            border: 2px solid var(--neon-green);
+            color: var(--neon-green);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .neon-button-green::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(57, 255, 20, 0.3), transparent);
+            transition: left 0.5s;
+        }
+        
+        .neon-button-green:hover::before {
+            left: 100%;
+        }
+        
+        .neon-button-green:hover {
+            background: var(--neon-green);
+            color: var(--dark-bg);
+            box-shadow: 0 0 20px var(--neon-green), 0 0 40px var(--neon-green);
+            transform: translateY(-2px);
+        }
+        
+        .neon-button-orange {
+            background: transparent;
+            border: 2px solid var(--neon-orange);
+            color: var(--neon-orange);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .neon-button-orange::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 107, 53, 0.3), transparent);
+            transition: left 0.5s;
+        }
+        
+        .neon-button-orange:hover::before {
+            left: 100%;
+        }
+        
+        .neon-button-orange:hover {
+            background: var(--neon-orange);
+            color: var(--dark-bg);
+            box-shadow: 0 0 20px var(--neon-orange), 0 0 40px var(--neon-orange);
+            transform: translateY(-2px);
+        }
+        
+        /* Background Effects */
+        .bg-grid {
+            background-image: 
+                linear-gradient(rgba(57, 255, 20, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(57, 255, 20, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            position: relative;
+        }
+        
+        .bg-grid::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(57, 255, 20, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .hero-gradient {
+            background: linear-gradient(135deg, var(--dark-bg) 0%, var(--dark-secondary) 50%, var(--dark-bg) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-gradient::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(57, 255, 20, 0.1) 0%, transparent 70%);
+            animation: float 20s infinite ease-in-out;
+        }
+        
+        .hero-gradient::after {
+            content: '';
+            position: absolute;
+            bottom: -50%;
+            left: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255, 107, 53, 0.1) 0%, transparent 70%);
+            animation: float 15s infinite ease-in-out reverse;
+        }
+        
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-fadeInUp {
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.8;
+                transform: scale(1.05);
+            }
+        }
+        
+        .animate-pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+            33% {
+                transform: translate(30px, -30px) rotate(5deg);
+            }
+            66% {
+                transform: translate(-20px, 20px) rotate(-5deg);
+            }
+        }
+        
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--dark-secondary);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--neon-green);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #2ecc00;
+        }
+        
+        /* Tech Specs Cards */
+        .tech-card {
+            background: var(--dark-card);
+            border: 1px solid rgba(57, 255, 20, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .tech-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(57, 255, 20, 0.05), transparent);
+            transition: left 0.6s;
+        }
+        
+        .tech-card:hover::before {
+            left: 100%;
+        }
+        
+        .tech-card:hover {
+            border-color: var(--neon-green);
+            box-shadow: 0 4px 20px rgba(57, 255, 20, 0.2);
+            transform: translateY(-5px);
+        }
+        
+        /* Step Cards */
+        .step-card {
+            background: var(--dark-card);
+            border: 1px solid rgba(255, 107, 53, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .step-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 107, 53, 0.05), transparent);
+            transition: left 0.6s;
+        }
+        
+        .step-card:hover::before {
+            left: 100%;
+        }
+        
+        .step-card:hover {
+            border-color: var(--neon-orange);
+            box-shadow: 0 4px 20px rgba(255, 107, 53, 0.2);
+            transform: translateY(-5px);
+        }
+        
+        /* Stats Counter */
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+        
+        /* Mobile Menu */
+        .mobile-menu {
+            display: none;
+            position: fixed;
+            top: 64px;
+            left: 0;
+            right: 0;
+            background: rgba(10, 10, 10, 0.98);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(57, 255, 20, 0.2);
+            padding: 20px;
+            z-index: 40;
+        }
+        
+        .mobile-menu.active {
+            display: block;
+            animation: slideDown 0.3s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Enhanced Hero Logo */
+        .hero-logo-large {
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(135deg, rgba(15, 32, 39, 0.5) 0%, rgba(32, 58, 67, 0.5) 50%, rgba(44, 83, 100, 0.5) 100%);
+            border-radius: 30px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 40px rgba(57, 255, 20, 0.3);
+            animation: float 6s infinite ease-in-out;
+            margin: 0 auto 30px;
+        }
+        
+        .hero-logo-large img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 0 15px rgba(57, 255, 20, 0.5));
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .stat-number {
+                font-size: 2rem;
+            }
+            
+            .hero-logo-large {
+                width: 150px;
+                height: 150px;
+            }
+            
+            h1 {
+                font-size: 2.5rem !important;
+            }
+        }
+        
+        /* Parallax Effect */
+        .parallax-section {
+            position: relative;
+        }
+        
+        /* Feature Icons Animation */
+        .feature-icon {
+            transition: all 0.3s ease;
+        }
+        
+        .feature-icon:hover {
+            transform: scale(1.1) rotate(5deg);
+        }
+        
+        /* Notification System */
+        .ecowing-notification {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 9999;
+            animation: slideInRight 0.3s ease-out;
+            transition: opacity 0.3s ease;
+        }
+        
+        .notification-content {
+            background: var(--dark-card);
+            border: 2px solid var(--neon-green);
+            border-radius: 12px;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(57, 255, 20, 0.3);
+            color: var(--neon-green);
+            font-weight: 600;
+            min-width: 300px;
+        }
+        
+        .notification-content.success {
+            border-color: var(--neon-green);
+            color: var(--neon-green);
+        }
+        
+        .notification-content.error {
+            border-color: var(--neon-orange);
+            color: var(--neon-orange);
+        }
+        
+        /* Whitepaper Section Styles */
+        .whitepaper-feature {
+            background: linear-gradient(135deg, rgba(57, 255, 20, 0.05) 0%, rgba(255, 107, 53, 0.05) 100%);
+            border: 1px solid rgba(57, 255, 20, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .whitepaper-feature:hover {
+            border-color: var(--neon-green);
+            box-shadow: 0 4px 20px rgba(57, 255, 20, 0.2);
+            transform: translateY(-3px);
+        }
+        
+        .whitepaper-icon {
+            background: linear-gradient(135deg, rgba(57, 255, 20, 0.2) 0%, rgba(255, 107, 53, 0.2) 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .whitepaper-feature:hover .whitepaper-icon {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 0 20px rgba(57, 255, 20, 0.4);
+        }
+    </style>
+    <base target="_blank">
+</head>
+<body class="bg-grid">
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 bg-black/80 backdrop-blur-sm border-b border-gray-800 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="logo-container">
+                        <img src="../website/assets/LOGOe.png" alt="EcoWing AI Logo" class="logo-image" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\'fas fa-leaf text-white text-sm\'></i>'">
+                    </div>
+                    <span class="text-xl font-bold">EcoWing <span class="neon-green">AI</span></span>
+                </div>
+                
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#problem" class="text-gray-300 hover:text-white transition-colors">El Problema</a>
+                    <a href="#how-it-works" class="text-gray-300 hover:text-white transition-colors">Cómo Funciona</a>
+                    <a href="#tech" class="text-gray-300 hover:text-white transition-colors">Tecnología</a>
+                    <a href="#evidence" class="text-gray-300 hover:text-white transition-colors">Evidencia</a>
+                    <button onclick="downloadWhitepaper()" class="neon-button-green px-4 py-2 rounded-lg font-medium">
+                        <i class="fas fa-download mr-2"></i>Whitepaper
+                    </button>
+                </div>
+                
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-button" class="md:hidden text-white p-2">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="mobile-menu">
+            <div class="flex flex-col space-y-4">
+                <a href="#problem" class="text-gray-300 hover:text-white transition-colors">El Problema</a>
+                <a href="#how-it-works" class="text-gray-300 hover:text-white transition-colors">Cómo Funciona</a>
+                <a href="#tech" class="text-gray-300 hover:text-white transition-colors">Tecnología</a>
+                <a href="#evidence" class="text-gray-300 hover:text-white transition-colors">Evidencia</a>
+                <button onclick="downloadWhitepaper()" class="neon-button-green px-4 py-2 rounded-lg font-medium w-full">
+                    <i class="fas fa-download mr-2"></i>Descargar Whitepaper
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-gradient min-h-screen flex items-center pt-16 relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <div class="animate-fadeInUp relative z-10">
+                    <div class="mb-6">
+                        <span class="inline-block px-4 py-2 bg-green-500/10 text-green-400 rounded-full text-sm font-medium border border-green-500/30">
+                            <i class="fas fa-rocket mr-2"></i>MVP Desarrollado • 2026
+                        </span>
+                    </div>
+                    
+                    <h1 class="text-5xl lg:text-7xl font-black leading-tight mb-6">
+                        Vigilancia <span class="neon-green">Robótica</span><br>
+                        <span class="neon-orange">Autónoma</span> para<br>
+                        <span class="text-white">Cultivos</span>
+                    </h1>
+                    
+                    <p class="text-xl text-gray-300 mb-8 leading-relaxed">
+                        EcoWing AI revoluciona la agricultura con drones autónomos equipados con <strong>Edge AI</strong>. 
+                        Detectamos plagas y enfermedades en <strong>tiempo real</strong> sin necesidad de internet, 
+                        protegiendo tus cultivos antes de que sea demasiado tarde.
+                    </p>
+                    
+                    <div class="flex flex-col sm:flex-row gap-4 mb-12">
+                        <button onclick="downloadWhitepaper()" class="neon-button-green px-8 py-4 rounded-xl font-semibold text-lg">
+                            <i class="fas fa-download mr-3"></i>Descargar Whitepaper Técnico
+                        </button>
+                        <a href="#tech" class="neon-button-orange px-8 py-4 rounded-xl font-semibold text-lg text-center">
+                            <i class="fas fa-code mr-3"></i>Ver Especificaciones
+                        </a>
+                    </div>
+                    
+                    <div class="grid grid-cols-3 gap-6">
+                        <div class="text-center">
+                            <div class="stat-number neon-green">79.87%</div>
+                            <div class="text-sm text-gray-400 mt-1">Precisión</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="stat-number neon-orange">&lt;200ms</div>
+                            <div class="text-sm text-gray-400 mt-1">Inferencia</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="stat-number neon-green">7.3MB</div>
+                            <div class="text-sm text-gray-400 mt-1">Modelo</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="animate-fadeInUp relative z-10" style="animation-delay: 0.2s;">
+                    <!-- Hero Logo Display -->
+                    <div class="hero-logo-large mb-8">
+                        <img src="../website/assets/LOGOe.png" alt="EcoWing AI - Drone Autónomo" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\'fas fa-drone text-white text-6xl\'></i>'">
+                    </div>
+                    
+                    <div class="relative">
+                        <div class="absolute inset-0 bg-gradient-to-r from-green-500/20 to-orange-500/20 rounded-3xl blur-3xl"></div>
+                        <div class="relative bg-gray-900/50 backdrop-blur-sm rounded-3xl p-8 neon-border-green">
+                            <h3 class="text-2xl font-bold text-center mb-4">EcoNet-Dual Architecture</h3>
+                            <div class="space-y-3 font-mono text-sm">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-400">MobileNetV2:</span>
+                                    <span class="neon-green">Detección Geométrica</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-400">EfficientNetB0:</span>
+                                    <span class="neon-orange">Análisis Textura</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-400">Quantization:</span>
+                                    <span class="text-white">INT8 TFLite</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-400">Hardware:</span>
+                                    <span class="text-white">Raspberry Pi</span>
+                                </div>
+                            </div>
+                            <div class="mt-6 p-4 bg-black/30 rounded-xl">
+                                <div class="text-xs text-gray-400 mb-2">ESTADO DEL SISTEMA</div>
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                                    <span class="text-green-400 text-sm">Operativo • Listo para Desplegar</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Problem Section -->
+    <section id="problem" class="py-20 bg-gray-900/50 relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl lg:text-5xl font-black mb-6">
+                    El Problema de la <span class="neon-orange">Brecha de Conectividad</span>
+                </h2>
+                <p class="text-xl text-gray-300 max-w-3xl mx-auto">
+                    La agricultura moderna pierde hasta un <strong>40% de la cosecha</strong> anualmente debido a la 
+                    detección tardía de plagas. Las soluciones en la nube fallan en zonas rurales sin internet.
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="tech-card rounded-2xl p-8 text-center">
+                    <div class="w-16 h-16 bg-red-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6 feature-icon">
+                        <i class="fas fa-exclamation-triangle text-red-400 text-2xl"></i>
+                    </div>
+                    <div class="stat-number text-red-400 mb-2">€220B</div>
+                    <h3 class="text-xl font-bold mb-3">Pérdidas Globales</h3>
+                    <p class="text-gray-400">Impacto económico anual por detección tardía de plagas y enfermedades en cultivos.</p>
+                </div>
+                
+                <div class="tech-card rounded-2xl p-8 text-center">
+                    <div class="w-16 h-16 bg-orange-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6 feature-icon">
+                        <i class="fas fa-wifi-slash text-orange-400 text-2xl"></i>
+                    </div>
+                    <div class="stat-number text-orange-400 mb-2">60%</div>
+                    <h3 class="text-xl font-bold mb-3">Zonas Sin Cobertura</h3>
+                    <p class="text-gray-400">Áreas agrícolas con conectividad 4G/5G insuficiente o inexistente para procesamiento en la nube.</p>
+                </div>
+                
+                <div class="tech-card rounded-2xl p-8 text-center">
+                    <div class="w-16 h-16 bg-yellow-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6 feature-icon">
+                        <i class="fas fa-clock text-yellow-400 text-2xl"></i>
+                    </div>
+                    <div class="stat-number text-yellow-400 mb-2">12-24h</div>
+                    <h3 class="text-xl font-bold mb-3">Tiempo de Respuesta</h3>
+                    <p class="text-gray-400">Demora actual entre detección manual de plagas y aplicación de tratamiento efectivo.</p>
+                </div>
+            </div>
+            
+            <div class="mt-16 p-8 bg-gradient-to-r from-red-500/10 to-orange-500/10 rounded-2xl border border-red-500/20">
+                <div class="flex items-start space-x-4">
+                    <div class="w-12 h-12 bg-red-500/20 rounded-xl flex items-center justify-center flex-shrink-0 feature-icon">
+                        <i class="fas fa-times text-red-400 text-xl"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-2xl font-bold mb-3">Por Qué Fallan las Soluciones Actuales</h3>
+                        <div class="grid md:grid-cols-3 gap-6 mt-6">
+                            <div>
+                                <h4 class="font-semibold text-red-400 mb-2">Inspección Manual</h4>
+                                <p class="text-gray-400 text-sm">Lenta, costosa y propensa a errores humanos. No escala para grandes extensiones.</p>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-red-400 mb-2">Drones + Nube</h4>
+                                <p class="text-gray-400 text-sm">Dependencia total de internet. Latencia insostenible para intervención en tiempo real.</p>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-red-400 mb-2">Sensores IoT</h4>
+                                <p class="text-gray-400 text-sm">Útiles para datos ambientales, pero ciegos a identificación visual de plagas específicas.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="py-20 relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl lg:text-5xl font-black mb-6">
+                    Cómo Funciona <span class="neon-green">EcoWing AI</span>
+                </h2>
+                <p class="text-xl text-gray-300 max-w-3xl mx-auto">
+                    Tres pasos simples para proteger tus cultivos con inteligencia artificial de vanguardia
+                </p>
+            </div>
+            
+            <div class="grid lg:grid-cols-3 gap-8">
+                <!-- Step 1 -->
+                <div class="step-card rounded-2xl p-8">
+                    <div class="flex items-center justify-center mb-6">
+                        <div class="w-20 h-20 bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl flex items-center justify-center">
+                            <span class="text-3xl font-black text-white">01</span>
+                        </div>
+                    </div>
+                    <div class="text-center mb-6">
+                        <i class="fas fa-drone text-blue-400 text-4xl mb-4 feature-icon"></i>
+                        <h3 class="text-2xl font-bold mb-3">Vuelo Autónomo</h3>
+                    </div>
+                    <p class="text-gray-300 mb-6">
+                        El dron despega y sobrevuela los cultivos siguiendo una ruta optimizada. La cámara de alta resolución 
+                        captura imágenes en tiempo real sin necesidad de conexión a internet.
+                    </p>
+                    <div class="space-y-2">
+                        <div class="flex items-center text-sm text-gray-400">
+                            <i class="fas fa-check text-green-400 mr-2"></i>
+                            <span>Velocidad de vuelo: 3-5 m/s</span>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-400">
+                            <i class="fas fa-check text-green-400 mr-2"></i>
+                            <span>Resolución: 224x224px</span>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-400">
+                            <i class="fas fa-check text-green-400 mr-2"></i>
+                            <span>100% Offline</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Step 2 -->
+                <div class="step-card rounded-2xl p-8">
+                    <div class="flex items-center justify-center mb-6">
+                        <div class="w-20 h-20 bg-gradient-to-br from-green-400 to-green-600 rounded-2xl flex items-center justify-center">
+                            <span class="text-3xl font-black text-white">02</span>
+                        </div>
+                    </div>
+                    <div class="text-center mb-6">
+                        <i class="fas fa-brain text-green-400 text-4xl mb-4 feature-icon"></i>
+                        <h3 class="text-2xl font-bold mb-3">Inferencia Edge</h3>
+                    </div>
+                    <p class="text-gray-300 mb-6">
+                        EcoNet-Dual procesa cada imagen a bordo usando MobileNetV2 + EfficientNetB0. El modelo cuantizado 
+                        (7.3MB) ejecuta inferencia en menos de 200ms directamente en el dron.
+                    </p>
+                    <div class="space-y-2">
+                        <div class="flex items-center text-sm text-gray-400">
+                            <i class="fas fa-check text-green-400 mr-2"></i>
+                            <span>Tiempo inferencia: &lt;200ms</span>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-400">
+                            <i class="fas fa-check text-green-400 mr-2"></i>
+                            <span>Tamaño modelo: 7.3MB</span>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-400">
+                            <i class="fas fa-check text-green-400 mr-2"></i>
+                            <span>17 clases de plantas/enfermedades</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Step 3 -->
+                <div class="step-card rounded-2xl p-8">
+                    <div class="flex items-center justify-center mb-6">
+                        <div class="w-20 h-20 bg-gradient-to-br from-orange-400 to-orange-600 rounded-2xl flex items-center justify-center">
+                            <span class="text-3xl font-black text-white">03</span>
+                        </div>
+                    </div>
+                    <div class="text-center mb-6">
+                        <i class="fas fa-bell text-orange-400 text-4xl mb-4 feature-icon"></i>
+                        <h3 class="text-2xl font-bold mb-3">Alerta Instantánea</h3>
+                    </div>
+                    <p class="text-gray-300 mb-6">
+                        Si se detecta una plaga, el sistema genera una alerta inmediata con coordenadas GPS precisas. 
+                        El agricultor recibe notificación en segundos, no en horas.
+                    </p>
+                    <div class="space-y-2">
+                        <div class="flex items-center text-sm text-gray-400">
+                            <i class="fas fa-check text-green-400 mr-2"></i>
+                            <span>Notificación: &lt;1 segundo</span>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-400">
+                            <i class="fas fa-check text-green-400 mr-2"></i>
+                            <span>Coordenadas GPS precisas</span>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-400">
+                            <i class="fas fa-check text-green-400 mr-2"></i>
+                            <span>Mapa de saliencia incluido</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Technology Section -->
+    <section id="tech" class="py-20 bg-gray-900/50 relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl lg:text-5xl font-black mb-6">
+                    Tecnología <span class="neon-green">EcoNet-Dual</span>
+                </h2>
+                <p class="text-xl text-gray-300 max-w-3xl mx-auto">
+                    Arquitectura de deep learning híbrida diseñada específicamente para operar en hardware de bajo costo
+                </p>
+            </div>
+            
+            <div class="grid lg:grid-cols-2 gap-12 items-center mb-16">
+                <div>
+                    <h3 class="text-3xl font-bold mb-6">Arquitectura Híbrida</h3>
+                    <p class="text-gray-300 mb-8 text-lg">
+                        Las patologías vegetales manifiestan patrones duales: deformación morfológica de la hoja (geometría) 
+                        y decoloración/necrosis (textura). EcoNet-Dual combina dos modelos especializados para maximizar 
+                        la precisión en detección de enfermedades.
+                    </p>
+                    
+                    <div class="space-y-6">
+                        <div class="flex items-start space-x-4 p-4 bg-gray-800/50 rounded-xl border border-green-500/20 hover:border-green-500/50 transition-all">
+                            <div class="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center flex-shrink-0 feature-icon">
+                                <i class="fas fa-shapes text-green-400"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-green-400 mb-1">MobileNetV2</h4>
+                                <p class="text-gray-300 text-sm">Optimizado para detección de formas geométricas y estructuras morfológicas de hojas.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start space-x-4 p-4 bg-gray-800/50 rounded-xl border border-orange-500/20 hover:border-orange-500/50 transition-all">
+                            <div class="w-12 h-12 bg-orange-500/20 rounded-xl flex items-center justify-center flex-shrink-0 feature-icon">
+                                <i class="fas fa-palette text-orange-400"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-orange-400 mb-1">EfficientNetB0</h4>
+                                <p class="text-gray-300 text-sm">Especializado en análisis de texturas complejas, decoloración y patrones de necrosis.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="relative">
+                    <div class="absolute inset-0 bg-gradient-to-r from-green-500/20 to-orange-500/20 rounded-3xl blur-3xl"></div>
+                    <div class="relative bg-gray-900/50 backdrop-blur-sm rounded-3xl p-8 neon-border-green">
+                        <div class="text-center mb-6">
+                            <h4 class="text-xl font-bold mb-4">Model Performance</h4>
+                        </div>
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span>Precisión (Test Accuracy)</span>
+                                    <span class="neon-green font-mono">79.87%</span>
+                                </div>
+                                <div class="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
+                                    <div class="bg-gradient-to-r from-green-400 to-green-500 h-2 rounded-full" style="width: 79.87%; box-shadow: 0 0 10px var(--neon-green);"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span>Reducción Tamaño Modelo</span>
+                                    <span class="neon-orange font-mono">72%</span>
+                                </div>
+                                <div class="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
+                                    <div class="bg-gradient-to-r from-orange-400 to-orange-500 h-2 rounded-full" style="width: 72%; box-shadow: 0 0 10px var(--neon-orange);"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span>Velocidad Inferencia</span>
+                                    <span class="neon-green font-mono">&lt;200ms</span>
+                                </div>
+                                <div class="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
+                                    <div class="bg-gradient-to-r from-green-400 to-green-500 h-2 rounded-full" style="width: 95%; box-shadow: 0 0 10px var(--neon-green);"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6 p-4 bg-black/30 rounded-xl">
+                            <h5 class="font-semibold mb-3">Optimizaciones Aplicadas</h5>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex items-center text-gray-300">
+                                    <i class="fas fa-check text-green-400 mr-2"></i>
+                                    <span>Transfer Learning desde ImageNet</span>
+                                </div>
+                                <div class="flex items-center text-gray-300">
+                                    <i class="fas fa-check text-green-400 mr-2"></i>
+                                    <span>Data Augmentation adversarial</span>
+                                </div>
+                                <div class="flex items-center text-gray-300">
+                                    <i class="fas fa-check text-green-400 mr-2"></i>
+                                    <span>Post-Training Quantization INT8</span>
+                                </div>
+                                <div class="flex items-center text-gray-300">
+                                    <i class="fas fa-check text-green-400 mr-2"></i>
+                                    <span>EarlyStopping & ModelCheckpoint</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Hardware Specs -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="tech-card rounded-xl p-6 text-center">
+                    <i class="fas fa-microchip text-green-400 text-3xl mb-4 feature-icon"></i>
+                    <h4 class="font-bold mb-2">Raspberry Pi</h4>
+                    <p class="text-gray-400 text-sm">Hardware accesible (~60-80€) para procesamiento Edge</p>
+                </div>
+                <div class="tech-card rounded-xl p-6 text-center">
+                    <i class="fas fa-memory text-orange-400 text-3xl mb-4 feature-icon"></i>
+                    <h4 class="font-bold mb-2">7.3MB Model</h4>
+                    <p class="text-gray-400 text-sm">TFLite INT8 cuantizado para máxima eficiencia</p>
+                </div>
+                <div class="tech-card rounded-xl p-6 text-center">
+                    <i class="fas fa-tachometer-alt text-green-400 text-3xl mb-4 feature-icon"></i>
+                    <h4 class="font-bold mb-2">&lt;200ms</h4>
+                    <p class="text-gray-400 text-sm">Tiempo de inferencia en tiempo real</p>
+                </div>
+                <div class="tech-card rounded-xl p-6 text-center">
+                    <i class="fas fa-shield-alt text-orange-400 text-3xl mb-4 feature-icon"></i>
+                    <h4 class="font-bold mb-2">100% Privacidad</h4>
+                    <p class="text-gray-400 text-sm">Sin envío de datos a servidores externos</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Evidence Section -->
+    <section id="evidence" class="py-20 relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl lg:text-5xl font-black mb-6">
+                    Evidencia <span class="neon-orange">Científica</span>
+                </h2>
+                <p class="text-xl text-gray-300 max-w-3xl mx-auto">
+                    Transparencia total con Mapas de Saliencia (XAI) que demuestran que la IA toma decisiones basadas en evidencia fitopatológica real
+                </p>
+            </div>
+            
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h3 class="text-3xl font-bold mb-6">Explicabilidad Visual</h3>
+                    <p class="text-gray-300 mb-8 text-lg">
+                        A diferencia de las "cajas negras" tradicionales, EcoWing AI genera Mapas de Saliencia que ofrecen 
+                        transparencia total sobre qué patrones visuales utiliza el modelo para tomar decisiones.
+                    </p>
+                    
+                    <div class="space-y-6">
+                        <div class="p-6 bg-gray-800/50 rounded-xl border border-red-500/20 hover:border-red-500/50 transition-all">
+                            <div class="flex items-center mb-3">
+                                <div class="w-3 h-3 bg-red-500 rounded-full mr-3 animate-pulse"></div>
+                                <span class="font-semibold">Foco en Lesiones</span>
+                            </div>
+                            <p class="text-gray-300 text-sm">El modelo ignora completamente el fondo artificial y se enfoca exclusivamente en las lesiones y texturas necróticas de la hoja.</p>
+                        </div>
+                        
+                        <div class="p-6 bg-gray-800/50 rounded-xl border border-yellow-500/20 hover:border-yellow-500/50 transition-all">
+                            <div class="flex items-center mb-3">
+                                <div class="w-3 h-3 bg-yellow-500 rounded-full mr-3 animate-pulse" style="animation-delay: 0.3s;"></div>
+                                <span class="font-semibold">Criterios Fitopatológicos</span>
+                            </div>
+                            <p class="text-gray-300 text-sm">La atención se concentra en píxeles iluminados en rojo/amarillo, validando que la IA utiliza criterios fitopatológicos reales.</p>
+                        </div>
+                        
+                        <div class="p-6 bg-gray-800/50 rounded-xl border border-green-500/20 hover:border-green-500/50 transition-all">
+                            <div class="flex items-center mb-3">
+                                <div class="w-3 h-3 bg-green-500 rounded-full mr-3 animate-pulse" style="animation-delay: 0.6s;"></div>
+                                <span class="font-semibold">Validación Científica</span>
+                            </div>
+                            <p class="text-gray-300 text-sm">Los mapas de saliencia confirman que el modelo no se basa en artefactos o correlaciones espurias.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="relative">
+                    <div class="absolute inset-0 bg-gradient-to-r from-green-500/20 to-orange-500/20 rounded-3xl blur-3xl"></div>
+                    <div class="relative bg-gray-900/50 backdrop-blur-sm rounded-3xl p-8 neon-border-orange">
+                        <div class="text-center mb-6">
+                            <h4 class="text-xl font-bold mb-4">Mapa de Saliencia</h4>
+                            <p class="text-gray-400 text-sm">Visualización de atención del modelo</p>
+                        </div>
+                        
+                        <!-- Saliency Map Visualization -->
+                        <div class="bg-gray-800 rounded-xl p-8 mb-6 border border-orange-500/20">
+                            <div class="mb-4">
+                                <img src="./visual_evidence_REAL.jpg" alt="Mapa de Saliencia - Visualización de atención del modelo" class="w-full rounded-lg shadow-lg border border-orange-500/30" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                <div style="display:none;" class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <div class="bg-gradient-to-br from-gray-700 to-gray-800 rounded-lg h-32 mb-3 flex items-center justify-center relative overflow-hidden">
+                                            <i class="fas fa-leaf text-gray-500 text-4xl"></i>
+                                            <div class="absolute inset-0 bg-green-500/5"></div>
+                                        </div>
+                                        <p class="text-xs text-gray-400 text-center">Imagen Original</p>
+                                    </div>
+                                    <div>
+                                        <div class="bg-gradient-to-br from-gray-700 to-gray-800 rounded-lg h-32 mb-3 flex items-center justify-center relative overflow-hidden">
+                                            <i class="fas fa-leaf text-gray-500 text-4xl"></i>
+                                            <div class="absolute top-2 right-2 w-4 h-4 bg-red-500 rounded-full animate-pulse"></div>
+                                            <div class="absolute bottom-2 left-2 w-6 h-6 bg-yellow-500 rounded-full animate-pulse" style="animation-delay: 0.5s;"></div>
+                                            <div class="absolute top-1/2 left-1/2 w-3 h-3 bg-red-400 rounded-full animate-pulse" style="animation-delay: 1s;"></div>
+                                        </div>
+                                        <p class="text-xs text-gray-400 text-center">Mapa de Saliencia</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-400 text-center mt-2">Mapa de Saliencia generado en tiempo real • Rojo/Amarillo = Alta importancia • Azul/Verde = Baja importancia</p>
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-400">Precisión detección virus:</span>
+                                <span class="neon-green font-mono">91%+</span>
+                            </div>
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-400">Clases detectadas:</span>
+                                <span class="text-white font-mono">17</span>
+                            </div>
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-400">Épocas entrenamiento:</span>
+                                <span class="text-white font-mono">5</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6 p-4 bg-black/30 rounded-xl">
+                            <h5 class="font-semibold mb-2">Matriz de Confusión</h5>
+                            <p class="text-gray-400 text-xs">
+                                Las confusiones principales se limitan a variantes fúngicas visualmente similares 
+                                (Early vs Late Blight), agronómicamente aceptable dado que comparten tratamiento.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 bg-gradient-to-r from-green-500/10 to-orange-500/10 relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Main CTA -->
+            <div class="text-center mb-12">
+                <h2 class="text-4xl lg:text-5xl font-black mb-6">
+                    ¿Listo para <span class="neon-green">Revolucionar</span> tu Agricultura?
+                </h2>
+                <p class="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
+                    Descarga nuestro whitepaper técnico completo y descubre cómo EcoWing AI puede proteger tus cultivos con inteligencia artificial de vanguardia.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+                    <button onclick="downloadWhitepaper()" class="neon-button-green px-8 py-4 rounded-xl font-semibold text-lg">
+                        <i class="fas fa-download mr-3"></i>Descargar Whitepaper Completo
+                    </button>
+                    <a href="mailto:contacto@ecowing.ai" class="neon-button-orange px-8 py-4 rounded-xl font-semibold text-lg">
+                        <i class="fas fa-envelope mr-3"></i>Contactar Equipo
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Whitepaper Content Preview -->
+            <div class="max-w-5xl mx-auto">
+                <div class="text-center mb-8">
+                    <h3 class="text-2xl font-bold mb-3">
+                        <i class="fas fa-file-alt text-green-400 mr-2"></i>
+                        Contenido del Whitepaper
+                    </h3>
+                    <p class="text-gray-400">Documento técnico completo con 40+ páginas de análisis profundo</p>
+                </div>
+                
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Feature 1 -->
+                    <div class="whitepaper-feature rounded-xl p-6">
+                        <div class="whitepaper-icon w-14 h-14 rounded-xl flex items-center justify-center mb-4">
+                            <i class="fas fa-chart-line text-green-400 text-2xl"></i>
+                        </div>
+                        <h4 class="font-bold text-lg mb-2">Análisis de Mercado</h4>
+                        <p class="text-gray-400 text-sm">Brecha de conectividad, oportunidades, y segmentación del mercado agrícola global</p>
+                    </div>
+                    
+                    <!-- Feature 2 -->
+                    <div class="whitepaper-feature rounded-xl p-6">
+                        <div class="whitepaper-icon w-14 h-14 rounded-xl flex items-center justify-center mb-4">
+                            <i class="fas fa-code text-orange-400 text-2xl"></i>
+                        </div>
+                        <h4 class="font-bold text-lg mb-2">Deep Dive Técnico</h4>
+                        <p class="text-gray-400 text-sm">Arquitectura EcoNet-Dual, optimización INT8, y estrategias de entrenamiento completas</p>
+                    </div>
+                    
+                    <!-- Feature 3 -->
+                    <div class="whitepaper-feature rounded-xl p-6">
+                        <div class="whitepaper-icon w-14 h-14 rounded-xl flex items-center justify-center mb-4">
+                            <i class="fas fa-flask text-green-400 text-2xl"></i>
+                        </div>
+                        <h4 class="font-bold text-lg mb-2">Validación Experimental</h4>
+                        <p class="text-gray-400 text-sm">Resultados completos, matrices de confusión, y benchmarks comparativos</p>
+                    </div>
+                    
+                    <!-- Feature 4 -->
+                    <div class="whitepaper-feature rounded-xl p-6">
+                        <div class="whitepaper-icon w-14 h-14 rounded-xl flex items-center justify-center mb-4">
+                            <i class="fas fa-eye text-orange-400 text-2xl"></i>
+                        </div>
+                        <h4 class="font-bold text-lg mb-2">XAI y Explicabilidad</h4>
+                        <p class="text-gray-400 text-sm">Mapas de saliencia (Grad-CAM) y validación de criterios fitopatológicos</p>
+                    </div>
+                    
+                    <!-- Feature 5 -->
+                    <div class="whitepaper-feature rounded-xl p-6">
+                        <div class="whitepaper-icon w-14 h-14 rounded-xl flex items-center justify-center mb-4">
+                            <i class="fas fa-map-marked-alt text-green-400 text-2xl"></i>
+                        </div>
+                        <h4 class="font-bold text-lg mb-2">Hoja de Ruta 2026-2027</h4>
+                        <p class="text-gray-400 text-sm">Roadmap completo, integración multiespectral, y lógica de enjambre autónomo</p>
+                    </div>
+                    
+                    <!-- Feature 6 -->
+                    <div class="whitepaper-feature rounded-xl p-6">
+                        <div class="whitepaper-icon w-14 h-14 rounded-xl flex items-center justify-center mb-4">
+                            <i class="fas fa-tools text-orange-400 text-2xl"></i>
+                        </div>
+                        <h4 class="font-bold text-lg mb-2">Guía de Despliegue</h4>
+                        <p class="text-gray-400 text-sm">Especificaciones hardware, código fuente, y guía paso a paso para implementación</p>
+                    </div>
+                </div>
+                
+                <!-- Stats -->
+                <div class="mt-8 p-6 bg-gray-900/50 rounded-xl border border-green-500/20">
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+                        <div>
+                            <div class="text-3xl font-black neon-green mb-1">40+</div>
+                            <div class="text-sm text-gray-400">Páginas</div>
+                        </div>
+                        <div>
+                            <div class="text-3xl font-black neon-orange mb-1">15+</div>
+                            <div class="text-sm text-gray-400">Gráficas</div>
+                        </div>
+                        <div>
+                            <div class="text-3xl font-black neon-green mb-1">25+</div>
+                            <div class="text-sm text-gray-400">Referencias</div>
+                        </div>
+                        <div>
+                            <div class="text-3xl font-black neon-orange mb-1">100%</div>
+                            <div class="text-sm text-gray-400">Técnico</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-black py-12 border-t border-gray-800 relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="flex items-center space-x-3 mb-4 md:mb-0">
+                    <div class="logo-container">
+                        <img src="../website/assets/LOGOe.png" alt="EcoWing AI Logo" class="logo-image" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\'fas fa-leaf text-white text-sm\'></i>'">
+                    </div>
+                    <span class="text-xl font-bold">EcoWing <span class="neon-green">AI</span></span>
+                </div>
+                <div class="text-center md:text-right">
+                    <p class="text-gray-400 text-sm">
+                        © 2026 EcoWing AI. Todos los derechos reservados.
+                    </p>
+                    <p class="text-gray-500 text-xs mt-1">
+                        Autonomous Crop Surveillance with Edge AI
+                    </p>
+                </div>
+            </div>
+            
+            <div class="mt-8 pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center">
+                <div class="flex space-x-6 mb-4 md:mb-0">
+                    <a href="https://github.com/rcaspad/EcoWing-AI" class="text-gray-400 hover:text-green-400 transition-colors" title="GitHub Repository">
+                        <i class="fab fa-github text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-green-400 transition-colors" title="LinkedIn">
+                        <i class="fab fa-linkedin text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-green-400 transition-colors" title="Twitter">
+                        <i class="fab fa-twitter text-xl"></i>
+                    </a>
+                </div>
+                <div class="text-xs text-gray-500 space-x-4">
+                    <span>Raúl Casado Padilla</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                    // Close mobile menu if open
+                    document.getElementById('mobile-menu').classList.remove('active');
+                }
+            });
+        });
+
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-button').addEventListener('click', function() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('active');
+        });
+
+        // Whitepaper download function
+        function downloadWhitepaper() {
+            // Create a temporary link to download the whitepaper PDF
+            const link = document.createElement('a');
+            link.href = 'assets/Whitepaper_EcoWing_AI.pdf';
+            link.download = 'Whitepaper_EcoWing_AI.pdf';
+            link.style.display = 'none';
+            
+            // Append to body, click, and remove
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Show confirmation message
+            showNotification('✅ Whitepaper descargado correctamente', 'success');
+        }
+        
+        // Notification system
+        function showNotification(message, type = 'info') {
+            // Remove any existing notifications
+            const existingNotif = document.querySelector('.ecowing-notification');
+            if (existingNotif) {
+                existingNotif.remove();
+            }
+            
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = 'ecowing-notification';
+            notification.innerHTML = `
+                <div class="notification-content ${type}">
+                    <i class="fas fa-check-circle mr-2"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            // Add to body
+            document.body.appendChild(notification);
+            
+            // Auto-remove after 3 seconds
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // Add scroll effect to navigation
+        let lastScroll = 0;
+        window.addEventListener('scroll', function() {
+            const nav = document.querySelector('nav');
+            const currentScroll = window.pageYOffset;
+            
+            if (currentScroll > 50) {
+                nav.classList.add('bg-black/90');
+                nav.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.5)';
+            } else {
+                nav.classList.remove('bg-black/90');
+                nav.style.boxShadow = 'none';
+            }
+            
+            lastScroll = currentScroll;
+        });
+
+        // Animate elements on scroll with Intersection Observer
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-fadeInUp');
+                    entry.target.style.opacity = '1';
+                }
+            });
+        }, observerOptions);
+
+        // Observe all sections and cards
+        document.querySelectorAll('section, .tech-card, .step-card').forEach(element => {
+            element.style.opacity = '0';
+            observer.observe(element);
+        });
+
+        // Parallax effect for hero section
+        window.addEventListener('scroll', function() {
+            const scrolled = window.pageYOffset;
+            const parallaxElements = document.querySelectorAll('.hero-gradient::before, .hero-gradient::after');
+            const heroSection = document.querySelector('.hero-gradient');
+            
+            if (heroSection && scrolled < window.innerHeight) {
+                heroSection.style.transform = `translateY(${scrolled * 0.5}px)`;
+            }
+        });
+
+        // Counter animation for stats
+        function animateValue(element, start, end, duration) {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                const value = Math.floor(progress * (end - start) + start);
+                element.innerHTML = value + '%';
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        // Initialize animations when page loads
+        window.addEventListener('load', function() {
+            // Trigger initial animations
+            document.querySelectorAll('.animate-fadeInUp').forEach((el, index) => {
+                setTimeout(() => {
+                    el.style.animationDelay = `${index * 0.1}s`;
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html>
+
