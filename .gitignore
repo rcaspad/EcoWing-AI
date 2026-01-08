@@ -1,102 +1,53 @@
-# ============================================
+﻿# ============================================
 # .gitignore para EcoWing AI
 # Sistema de Detección de Plagas mediante Edge AI
 # ============================================
 
-# ============================================
-# ENTORNOS VIRTUALES (NO SUBIR)
-# ============================================
-venv/
-env/
-.env
-.venv/
-ENV/
-env.bak/
-venv.bak/
-
-# ============================================
-# PYTHON CACHE (NO SUBIR)
-# ============================================
+# Python
 __pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
+*.pyc
+venv/
+.env
 
-# ============================================
-# DATASETS (¡MUY IMPORTANTE! - GIGAS DE DATOS)
-# ============================================
-# ⚠️ NUNCA subir los datasets completos a GitHub
+# Scripts obsoletos de raíz (mantener SOLO en src/)
+check_architecture.py
+cleanup.py
+convert_md_to_pdf.py
+index.html
+
+# Datos y Modelos Pesados (Local only)
 data/
-data/*
-!data/.gitkeep
-
-# ============================================
-# MODELOS PESADOS (>100MB - LÍMITE GITHUB)
-# ============================================
-# Excluir modelos Keras/H5 grandes (32+ MB)
 models/*.keras
 models/*.h5
-models/*.hdf5
 
-# Permitir modelos optimizados TFLite (<10MB)
-!models/*.tflite
-
-# Permitir archivos de configuración livianos
-!models/labels.txt
-!models/*.txt
-!models/*.npy
-
-# Ignorar checkpoints temporales
-models/checkpoints/
-models/temp/
-models/*.tmp
-models/*.temp
-
-# ============================================
-# ARCHIVOS DE SISTEMA OPERATIVO
-# ============================================
-# macOS
+# Sistema
 .DS_Store
-.AppleDouble
-.LSOverride
-
-# Windows
 Thumbs.db
-Thumbs.db:encryptable
-ehthumbs.db
-ehthumbs_vista.db
-desktop.ini
-
-# Linux
-*~
-.directory
-.Trash-*
-
-# ============================================
-# IDEs Y EDITORES
-# ============================================
-# Visual Studio Code
 .vscode/
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
 
-# PyCharm
+# Logs
+*.log
+
+# ============================================
+# SEGURIDAD Y SECRETOS
+# ============================================
+credentials.json
+secrets.json
+*.key
+*.pem
+
+# ============================================
+# IDEs Y EDITORES (adicionales)
+# ============================================
 .idea/
 *.iml
-*.iws
-.idea_modules/
-
-# Jupyter Notebook
-.ipynb_checkpoints/
-*.ipynb_checkpoints
-
-# Spyder
 .spyderproject
-.spyproject
+
+# ============================================
+# NOTEBOOKS Y CACHE
+# ============================================
+.ipynb_checkpoints/
+.pytest_cache/
 
 # ============================================
 # DISTRIBUCIÓN Y EMPAQUETADO
@@ -104,72 +55,13 @@ desktop.ini
 build/
 dist/
 *.egg-info/
-.eggs/
 *.egg
-wheels/
-pip-wheel-metadata/
 *.whl
 
 # ============================================
-# TESTING Y COVERAGE
+# ARCHIVOS TEMPORALES
 # ============================================
-.pytest_cache/
-.tox/
-.nox/
-.coverage
-.coverage.*
-htmlcov/
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-
-# ============================================
-# LOGS Y TEMPORALES
-# ============================================
-*.log
-logs/
-*.out
-*.pid
-*.seed
-
-# ============================================
-# SECRETS Y CREDENCIALES
-# ============================================
-.env
-.env.*
-*.env
-credentials.json
-secrets.json
-*.key
-*.pem
-
-# ============================================
-# ARCHIVOS COMPRIMIDOS GRANDES
-# ============================================
-*.zip
-*.tar
-*.tar.gz
-*.tgz
-*.rar
-*.7z
-
-# ============================================
-# OUTPUTS Y CACHE DE ML
-# ============================================
-*.ckpt
-*.ckpt.*
-wandb/
-mlruns/
-
-# ============================================
-# OTROS
-# ============================================
-# Archivos temporales de editores
 *.swp
 *.swo
-*.swn
 *~
-
-# macOS resource forks
-._*
+*.tmp
